@@ -15,14 +15,13 @@ ma = Marshmallow(app)
 class Member(db.Model):
     __tablename__ = 'members'
 
-
-id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-email = db.Column(db.String(255), unique=True, nullable=False)
-username = db.Column(db.String(50), unique=True)
-password_hash = db.Column(db.String(100))
-firstname = db.Column(db.String(50), unique=False)
-lastname = db.Column(db.String(50), unique=False)
-registered_on = db.Column(db.DateTime, nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True)
+    password_hash = db.Column(db.String(100))
+    firstname = db.Column(db.String(50), unique=False)
+    lastname = db.Column(db.String(50), unique=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
 
 
 class MemberSchema(ma.ModelSchema):
