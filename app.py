@@ -9,39 +9,55 @@ app.config.from_pyfile('config.cfg')
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-## --Database Models--
+# --Database Models--
+
+
 class Member(db.Model):
     __tablename__ = 'members'
+
+
 id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    username = db.Column(db.String(50), unique=True)
-    password_hash = db.Column(db.String(100))
-    firstname = db.Column(db.String(50), unique=False)
-    lastname = db.Column(db.String(50), unique=False)
-    registered_on = db.Column(db.DateTime, nullable=False)
+email = db.Column(db.String(255), unique=True, nullable=False)
+username = db.Column(db.String(50), unique=True)
+password_hash = db.Column(db.String(100))
+firstname = db.Column(db.String(50), unique=False)
+lastname = db.Column(db.String(50), unique=False)
+registered_on = db.Column(db.DateTime, nullable=False)
+
+
 class MemberSchema(ma.ModelSchema):
     class Meta:
         model = Member
         fields = ('id', 'username', 'email')
+
+
 member_schema = MemberSchema(strict=True, only=('id', 'username'))
 members_schema = MemberSchema(strict=True, many=True)
-## --Views--
+# --Views--
+
+
 @app.route('/')
 def index():
     return jsonify({'message': 'ok'}), 200
 # list users
+
+
 @app.route('/api/user', methods=['GET'])
 def list_users():
     all_users = Member.query.all()
     result = members_schema.dump(all_users)
     return jsonify(result.data)
 # get user
+
+
 @app.route('/api/user/<int:id>', methods=['GET'])
 def get_user(id):
     user = Member.query.get(id)
     result = member_schema.dump(user)
     return jsonify(result.data)
 # add user
+
+
 @app.route('/api/user', methods=['POST'])
 def add_user():
     email = request.json['email']
@@ -49,7 +65,8 @@ def add_user():
     password_hash = sha256_crypt.encrypt(request.json['password'])
     firstname = request.json['firstname']
     lastname = request.json['lastname']
-    new_user = Member(email=email, username=username, password_hash=password_hash, firstname=firstname, lastname=lastname, registered_on=datetime.utcnow())
+    new_user = Member(email=email, username=username, password_hash=password_hash,
+                      firstname=firstname, lastname=lastname, registered_on=datetime.utcnow())
     try:
         db.session.add(new_user)
         db.session.commit()
@@ -60,6 +77,8 @@ def add_user():
         result = {'message': 'error'}
         return jsonify(result)
 # update user
+
+
 @app.route('/api/user/<int:id>', methods=['PUT'])
 def update_user(id):
     user = Member.query.get(id)
@@ -70,11 +89,15 @@ def update_user(id):
     db.session.commit()
     return member_schema.jsonify(user)
 # delete user
+
+
 @app.route('/api/user/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = Member.query.get(id)
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': '{} has been deleted'.format(user.username)})
+
+
 if __name__ == '__main__':
     app.run()
